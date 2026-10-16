@@ -1,0 +1,36 @@
+name: Scrape Eitaa Posts
+
+on:
+  schedule:
+    - cron: '0 * * * *'    # هر یک ساعت، دقیقه صفر
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4
+
+      - name: Run scraper
+        run: python scraper.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add posts.json
+          git diff --staged --quiet || git commit -m "Update posts $(date '+%Y-%m-%d %H:%M')"
+          git push
